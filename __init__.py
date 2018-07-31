@@ -3,19 +3,19 @@ import re
 BLOCKS = ['uses', 'var', 'const', 'type']
 FUNCS = ['function', 'procedure', 'constructor', 'destructor']
 
-UNARY_SYMS = ['(',')','[',']','/','|','\\','@','#','=','>','<',':',';',',','.','$','+','-','*']
-NO_UNARY_SYMS = ['>=','<=','<>',':=','..']
+SYMS1 = ['(',')','[',']','/','|','\\','@','#','=','>','<',':',';',',','.','$','+','-','*']
+SYMS2 = ['>=','<=','<>',':=','..']
 SPACES = ['\f','\n','\r','\t','\v',' ']
-NO_NAME_SYMS = UNARY_SYMS + SPACES
+NO_NAME_SYMS = SYMS1 + SPACES
 
 def init(s):
     global i0, i1, ended, gllines, lastline
-    if 0 == len(s[0]):
+    if not s[0]:
         if i0+1 == len(s):
             ended = True
         else:
             i0+=1
-            while len(s[i0]) == 0:
+            while not s[i0]:
                 if i0+1 == len(s):
                     ended = True
                     break
@@ -49,9 +49,9 @@ def get_next_work(s):
                     ss='('
                     f=False
             else:
-                if s[i0][i1] in UNARY_SYMS:
+                if s[i0][i1] in SYMS1:
                     if i1+1!=len(s[i0]):
-                        if s[i0][i1]+s[i0][i1+1] in NO_UNARY_SYMS:
+                        if s[i0][i1]+s[i0][i1+1] in SYMS2:
                             i1+=1
                             ss=s[i0][i1:i1+1]
                         else:
@@ -67,10 +67,10 @@ def get_next_work(s):
                         else:
                             i0+=1
                             i1=0
-                            while len(s[i0])!=0:
+                            while not s[i0]:
                                 if i0+1==len(s):
                                     ended=True
-                                    break
+                                    return ss
                                 i0+=1
                         break
                     else:
@@ -83,10 +83,10 @@ def get_next_work(s):
                             else:
                                 i0+=1
                                 i1=0
-                                while len(s[i0])!=0:
+                                while not s[i0]:
                                     if i0+1==len(s):
                                         ended = True
-                                        break
+                                        return ss
                                     i0+=1
                             return ss+"'"
                         else:
@@ -102,10 +102,10 @@ def get_next_work(s):
                             else:
                                 i0+=1
                                 i1=0
-                                while len(s[i0])==0:
+                                while not s[i0]:
                                     if i0+1==len(s):
                                         ended = True
-                                        break
+                                        return ss
                                     i0+=1
                             break
                         else:
@@ -124,7 +124,7 @@ def get_next_work(s):
             else:
                 i0+=1
                 i1=0
-            while len(s[i0])==0:
+            while not s[i0]:
                 if i0+1==len(s):
                     ended = True
                     break
@@ -249,7 +249,7 @@ def get_headers(filename, lines):
     uses = []
     ended = False
     std_block_parse(1)
-    if len(uses)!=0:
+    if uses:
         yield (uses[0][1],1,'uses',0)
         i=0
         while i!=len(uses):
