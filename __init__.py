@@ -1,21 +1,26 @@
 import re
 
-blocks=['uses','var','const','type']
+BLOCKS = ['uses', 'var', 'const', 'type']
+
+UNARY_SYMS = ['(',')','[',']','/','|','\\','@','#','=','>','<',':',';',',','.','$','+','-','*']
+NO_UNARY_SYMS = ['>=','<=',':=','..']
+SPACES = ['\f','\n','\r','\t','\v',' ']
+NO_NAME_SYMS = UNARY_SYMS + SPACES
 
 def init(s):
     global i0, i1, ended, gllines, lastline
-    if 0==len(s[0]):
-        if i0+1==len(s):
+    if 0 == len(s[0]):
+        if i0+1 == len(s):
             ended = True
         else:
             i0+=1
-            while len(s[i0])==0:
-                if i0+1==len(s):
+            while len(s[i0]) == 0:
+                if i0+1 == len(s):
                     ended = True
                     break
                 i0+=1
-    gllines=s
-    lastline=(False,'')
+    gllines = s
+    lastline = (False, '')
 
 def get_next_work(s):
     global i0, i1, ended
@@ -43,9 +48,9 @@ def get_next_work(s):
                     ss='('
                     f=False
             else:
-                if s[i0][i1] in ['(',')','[',']','/','|','\\','@','#','=','>','<',':',';',',','.','$','+','-','*']:
+                if s[i0][i1] in UNARY_SYMS:
                     if i1+1!=len(s[i0]):
-                        if s[i0][i1]+s[i0][i1+1] in ['>=','<=',':=','..']:
+                        if s[i0][i1]+s[i0][i1+1] in NO_UNARY_SYMS:
                             i1+=1
                             ss=s[i0][i1:i1+1]
                         else:
@@ -88,7 +93,7 @@ def get_next_work(s):
                     ss=ss+"'"
                     f=False
                 elif re.match('\\S',s[i0][i1]):
-                    while not(s[i0][i1] in ['(',')','[',']','/','|','\\','@','#','=','>','<',':',';',',','.','$','\f','\n','\r','\t','\v','+','-','*',' ']):
+                    while not(s[i0][i1] in NO_NAME_SYMS):
                         ss=ss+s[i0][i1]
                         if i1+1==len(s[i0]):
                             if i0+1==len(s):
@@ -158,15 +163,15 @@ def isname(s):
             return False
     return True
 
-def std_block_parse():
+def std_block_parse(level):
     while not ended:
         s=get_next().lower()
         if s=='type':
-            type_block_parse()
+            pass#type_block_parse(level)
         if s=='uses':
-            uses_block_parse()
+            uses_block_parse(level)
 
-def uses_block_parse():
+def uses_block_parse(level):
     global uses
     while not ended:
         s=get_next()
@@ -175,42 +180,76 @@ def uses_block_parse():
         elif not(s in [',','in'] or s[0]=="'"):
             uses.append(tuple([s,i0]))
 
-def type_block_parse():
+def type_block_parse(level):
+    global out
+    update_bp = True
     while not ended:
+        if update_bp:
+            begin_pos = i0
+        else:
+            update_bp = True
         s=get_next()
         if s==';':
             continue
-        #elif s in blocks
+        #elif s in BLOCKS
         elif isname(s):
+            objname=s
             ss=get_next()
             if ss==';':
                 continue
             elif ss=='=':
                 s=get_next()
+                if s=='packed':
+                    s=get_next()
                 if s==';':
                     continue
                 elif s=='class':
-                    pass
+                    ss=get_next()
+                    if ss!=';':
+                        out.append(tuple([begin_pos,level,objname,1]))
+                        class_block_parse(level+1)
+                    else:
+                        continue
+                    #if ss in class
                 elif s=='record':
                     pass
-        elif s in ['procedure','function']:
+            elif ss=='<':
+                ss=get_next()
+                i=1
+                while True:
+                    if ss=='>':
+                        i-=1
+                    elif ss=='<':
+                        i+=1
+                    if i==0:
+                        break
+                    if ended:
+                        return
+                    ss=get_next()
+                set_last(s)
+                update_bp = False
+                continue
+        elif s in ['procedure','function','begin']+BLOCKS:
             set_last(s)
             break
         elif s=='class':
             ss=get_next()
             if ss=='operator':
                 continue
+                
+def class_block_parse(level):
+    pass
 
 def get_headers(filename, lines):
-    global i0, i1, uses, ended, out
+    global i0, i1, uses, out, ended, out
     i0, i1 = 0, 0
     init(lines)
-    out=[]
+    out = []
     uses = []
     ended = False
-    std_block_parse()
+    std_block_parse(1)
     if len(uses)!=0:
-        yield (uses[0][1],1,'uses',4)
+        yield (uses[0][1],1,'uses',0)
         i=0
         while i!=len(uses):
             if i==0:
@@ -224,6 +263,8 @@ def get_headers(filename, lines):
                     s=uses[i]
             i+=1
         yield (s[1],2,s[0],4)
+    for i in out:
+        yield i
     #for i in range(5):
     #while not ended:
     #    yield (i0,1,get_next(),0)
