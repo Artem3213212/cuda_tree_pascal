@@ -1,9 +1,10 @@
 import re
 
 BLOCKS = ['uses', 'var', 'const', 'type']
+FUNCS = ['function', 'procedure', 'constructor', 'destructor']
 
 UNARY_SYMS = ['(',')','[',']','/','|','\\','@','#','=','>','<',':',';',',','.','$','+','-','*']
-NO_UNARY_SYMS = ['>=','<=',':=','..']
+NO_UNARY_SYMS = ['>=','<=','<>',':=','..']
 SPACES = ['\f','\n','\r','\t','\v',' ']
 NO_NAME_SYMS = UNARY_SYMS + SPACES
 
