@@ -1,7 +1,11 @@
-from .pascal_tokenizer import *
+if __name__=="__main__":
+    from pascal_tokenizer import *
+else:
+    from .pascal_tokenizer import *
 
 BLOCKS=['uses','var','const','type']
 FUNCS=['function','procedure','constructor','destructor']
+ACCESS_CONTROL=['private','protected','public','published']
 
 def get():
     global ended, line
@@ -10,19 +14,37 @@ def get():
     line = s[1][0]
     return s[0]
 
+def restore(s):
+    s = tokenizer.push([s,[line],[],ended])
+
 def std_block_parse():
+    TO_SKIP = ['class']
     z=[]
     #current_begin=line
     while not ended:
         s = get().lower()
         begin_pos = line
-        if s=='uses':
+        if s in TO_SKIP:
+            continue
+        if s=='[':
+            while not ended and get()!=']':
+                pass
+        elif s=='uses':
             uses_block_parse()
         elif s=='type':
             z=z+type_block_parse()
             break
+        elif s=='const':
+            z=z+const_block_parse()
+            break
         elif s in FUNCS:
             pass#metod
+        elif s=='begin':
+            pass
+        elif s=='end':
+            while get()!=';':
+                pass
+            break
     return z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
 
 def uses_block_parse():
@@ -31,8 +53,29 @@ def uses_block_parse():
         s = get()
         if s==';':
             break
-        elif not (s in [',','in'] or s[0]=="'"):
+        elif not (s in [',','in'] or is_string(s)):
             uses.append(tuple([s,line]))
+
+def const_block_parse():
+    z=[]
+    while not ended:
+        s = get()
+        current_begin = line
+        if s in ['class','begin','end']+ACCESS_CONTROL+FUNCS+BLOCKS:
+            restore(s)
+            break
+        elif not ended:
+            i=0
+            while not ended:
+                ss=get()
+                if ss=='(':
+                    i+=1
+                elif ss==')':
+                    i-=1
+                elif ss==';' and i<=0:
+                    break
+            z.append(tuple([current_begin,s,7,[]]))
+    return z
 
 def type_block_parse():
     global out
@@ -70,13 +113,18 @@ def type_block_parse():
                     continue
                 elif s=='class':
                     ss=get()
-                    if ss!=';':
+                    if ss=='of':
+                        while get()!=';':
+                            pass
+                        z.append(tuple([begin_pos,objname,1,[]]))
+                    elif ss!=';':
                         #out.append(tuple([begin_pos,level,objname,1]))
+                        restore(ss)
                         z.append(tuple([begin_pos,objname,1,class_block_parse()]))
                     else:
                         continue
                 elif s=='record':
-                    pass
+                    z.append(tuple([begin_pos,objname,1,std_block_parse()]))
                 elif is_name(s):
                     while get()!=';':
                         pass
@@ -101,10 +149,18 @@ def type_block_parse():
 
 def class_block_parse():
     z=[]
-    #s=get()
-    while get()!='end':
-        pass#z=z+std_block_parse()
-    get()
+    s = get()
+    if ended:
+        return []
+    if s in ['absract','sealed']:
+        s=get()
+    if s=='(':
+        while not ended and get()!=')':
+            pass
+    else:
+        restore(s)
+
+    z=z+std_block_parse()
     return z
 
 def table_print(level, data):
@@ -137,7 +193,10 @@ def get_headers(filename, lines):
     for i in out:
         yield i
 
-#if __name__=="__main__":
-    #ss=open('W:\\AG.Graphic.pas').read().split('\n')
-    #for i in get_headers('',ss):
-        #print(i)
+if __name__=="__main__":
+    ss=open('C:\\codetyphon\\fpcsrc\\tests\\test\\alglib\\u_ap.pp').read().split('\n')
+    for i in get_headers('',ss):
+        print(i)
+    ss=open('C:\\codetyphon\\fpcsrc\\tests\\test\\jvm\\classlist.pp').read().split('\n')
+    for i in get_headers('',ss):
+        print(i)
