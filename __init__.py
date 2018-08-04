@@ -4,7 +4,7 @@ else:
     from .pascal_tokenizer import *
 
 BLOCKS=['uses','var','const','type']
-FUNCS=['function','procedure','constructor','destructor']
+FUNCS=['function','procedure','constructor','destructor','operator']
 ACCESS_CONTROL=['private','protected','public','published']
 
 def get():
@@ -20,6 +20,8 @@ def restore(s):
 def std_block_parse():
     TO_SKIP = ['class']
     z=[]
+    vars=[]
+    funcreg=[]
     #current_begin=line
     while not ended:
         s = get().lower()
@@ -33,19 +35,57 @@ def std_block_parse():
             uses_block_parse()
         elif s=='type':
             z=z+type_block_parse()
-            break
+            #break
         elif s=='const':
-            z=z+const_block_parse()
-            break
+            vars=vars+const_block_parse()
+            #break
+        elif s=='var':
+            pass#vars=vars+var_block_parse()
+            #break
         elif s in FUNCS:
-            pass#metod
+            z=z+function_parse(begin_pos,funcreg)
         elif s=='begin':
             pass
         elif s=='end':
             while get()!=';':
                 pass
             break
-    return z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
+    if vars:
+        return [(vars[0][0],'var&const',2,vars)]+z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
+    else:
+        return z
+
+def function_parse(begin_pos,funcreg):
+    f=True
+    s=''
+    ss=''
+    while not ended:
+        ss = get()
+        if ss in ['(',':',';']:
+            break
+        elif ss=='.':
+            f=False
+        s=s+ss
+    if ss == '(':
+        while not ended and get()==')':
+            pass
+        ss = get()
+    if ss == ';':
+        while not ended and get()==';':
+            pass
+    if f:
+        f = True
+        for i in funcreg:
+            if i==s:
+                f = False
+                break
+        if f:
+            funcreg.append(s)
+            return [(begin_pos,s,5,[])]
+    return []
+
+def var_block_parse():
+    pass
 
 def uses_block_parse():
     global uses
@@ -194,9 +234,11 @@ def get_headers(filename, lines):
         yield i
 
 if __name__=="__main__":
-    ss=open('C:\\codetyphon\\fpcsrc\\tests\\test\\alglib\\u_ap.pp').read().split('\n')
-    for i in get_headers('',ss):
-        print(i)
-    ss=open('C:\\codetyphon\\fpcsrc\\tests\\test\\jvm\\classlist.pp').read().split('\n')
-    for i in get_headers('',ss):
-        print(i)
+    import os
+    for file in os.listdir("tests"):
+        if file.endswith(".pp"):
+            print()
+            print('test',file)
+            ss=open(os.path.join("tests",file)).read().split('\n')
+            for i in get_headers('',ss):
+                print(i)
