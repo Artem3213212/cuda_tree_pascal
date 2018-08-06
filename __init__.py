@@ -6,7 +6,7 @@ else:
 BLOCKS=['uses','var','const','type']
 FUNCS=['function','procedure','constructor','destructor','operator']
 ACCESS_CONTROL=['private','protected','public','published']
-FUNCTIONS_DIRECTIVES=['reintroduce','overload','virtual','override','abstract','dynamic','inline','assembler','forward','implementation','interface']
+FUNCTIONS_DIRECTIVES=['reintroduce','overload','virtual','override','abstract','dynamic','inline','assembler','forward','interface']
 
 def get():
     global ended, line
@@ -23,7 +23,7 @@ def std_block_parse(var_at_begin=False):
         vars = var_block_parse()
     else:
         vars = []
-    TO_SKIP = ['class']
+    TO_SKIP = ['class','implementation','interface']
     zz=[]
     z=[]
     funcreg=[]
@@ -55,6 +55,8 @@ def std_block_parse(var_at_begin=False):
         elif s.lower() == 'end':
             while ended and not get() in [';','.']:
                 pass
+            break
+        elif s.lower() in ['initialization','finalization']:
             break
     if vars:
         return [(vars[0][0],'var&const',2,vars)]+zz+z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
@@ -130,7 +132,7 @@ def var_block_parse():
     while not ended:
         s = get()
         current_begin = line
-        if s.lower() in ['class','begin','end']+ACCESS_CONTROL+FUNCS+BLOCKS:
+        if s.lower() in ['class','begin','end','implementation','interface','initialization','finalization']+ACCESS_CONTROL+FUNCS+BLOCKS:
             restore(s)
             break
         elif not ended:
@@ -168,7 +170,7 @@ def const_block_parse():
     while not ended:
         s = get()
         current_begin = line
-        if s.lower() in ['class','begin','end']+ACCESS_CONTROL+FUNCS+BLOCKS:
+        if s.lower() in ['class','begin','end','implementation','interface','initialization','finalization']+ACCESS_CONTROL+FUNCS+BLOCKS:
             restore(s)
             break
         elif not ended:
