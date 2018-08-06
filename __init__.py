@@ -6,6 +6,7 @@ else:
 BLOCKS=['uses','var','const','type']
 FUNCS=['function','procedure','constructor','destructor','operator']
 ACCESS_CONTROL=['private','protected','public','published']
+FUNCTIONS_DIRECTIVES=['reintroduce','overload','virtual','override','abstract','dynamic','inline','assembler','forward']
 
 def get():
     global ended, line
@@ -17,10 +18,13 @@ def get():
 def restore(s):
     s = tokenizer.push([s,[line],[],ended])
 
-def std_block_parse():
-    TO_SKIP = ['class','reintroduce','overload','virtual','override','abstract','dynamic']
+def std_block_parse(var_at_begin=False):
+    if var_at_begin:
+        vars = var_block_parse()
+    else:
+        vars = []
+    TO_SKIP = ['class'] + FUNCTIONS_DIRECTIVES
     z=[]
-    vars=[]
     funcreg=[]
     #current_begin=line
     while not ended:
@@ -39,8 +43,8 @@ def std_block_parse():
         elif s=='const':
             vars=vars+const_block_parse()
             #break
-        elif s=='var':
-            pass#vars=vars+var_block_parse()
+        elif s in ['var']+ACCESS_CONTROL:
+            vars=vars+var_block_parse()
             #break
         elif s in FUNCS:
             z=z+function_parse(begin_pos,funcreg)
@@ -84,9 +88,6 @@ def function_parse(begin_pos,funcreg):
             return [(begin_pos,s,5,[])]
     return []
 
-def var_block_parse():
-    pass
-
 def uses_block_parse():
     global uses
     while not ended:
@@ -95,6 +96,44 @@ def uses_block_parse():
             break
         elif not (s in [',','in'] or is_string(s)):
             uses.append(tuple([s,line]))
+
+def var_block_parse():
+    z=[]
+    while not ended:
+        s = get()
+        current_begin = line
+        if s in ['class','begin','end']+ACCESS_CONTROL+FUNCS+BLOCKS:
+            restore(s)
+            break
+        elif not ended:
+            i=0
+            while not ended:
+                ss=get()
+                if ss=='packed':
+                    ss=get()
+                if s=='specialize':
+                    s=get()
+                if ss=='record':
+                    z=(current_begin,s,7,std_block_parse())
+                if ss=='class':
+                    ss=get()
+                    if ss=='of':
+                        while get()!=';':
+                            pass
+                        z.append(tuple([begin_pos,objname,1,[]]))
+                    elif ss!=';':
+                        restore(ss)
+                        z.append(tuple([begin_pos,objname,1,class_block_parse()]))
+                    else:
+                        continue
+                if ss=='(':
+                    i+=1
+                elif ss==')':
+                    i-=1
+                elif ss==';' and i<=0:
+                    break
+            z.append(tuple([current_begin,s,7,[]]))
+    return z
 
 def const_block_parse():
     z=[]
@@ -118,7 +157,6 @@ def const_block_parse():
     return z
 
 def type_block_parse():
-    global out
     z = []
     update_bp = True
     while not ended:
@@ -236,11 +274,10 @@ def get_headers(filename, lines):
 if __name__=="__main__":
     import os
     for file in os.listdir("tests"):
-        if file.endswith(".pp3") or file.endswith(".pas"):
+        if file.endswith(".pp") or file.endswith(".pass"):
             print()
             print('test',file)
-            ss=open(os.path.join("tests",file),encoding='utf-8').read().split('\n')[485:]#210
-            for i in ss:
-                print(i)
+            ss=open(os.path.join("tests",file),encoding='utf-8').read().split('\n')
             for i in get_headers('',ss):
                 print(i)
+            break
