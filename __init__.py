@@ -23,7 +23,8 @@ def std_block_parse(var_at_begin=False):
         vars = var_block_parse()
     else:
         vars = []
-    TO_SKIP = ['class'] + FUNCTIONS_DIRECTIVES
+    TO_SKIP = ['class']
+    zz=[]
     z=[]
     funcreg=[]
     #current_begin=line
@@ -38,28 +39,51 @@ def std_block_parse(var_at_begin=False):
         elif s=='uses':
             uses_block_parse()
         elif s=='type':
-            z=z+type_block_parse()
-            #break
+            z+=type_block_parse()
         elif s=='const':
-            vars=vars+const_block_parse()
-            #break
+            vars+=const_block_parse()
         elif s in ['var']+ACCESS_CONTROL:
-            vars=vars+var_block_parse()
-            #break
+            vars+=var_block_parse()
         elif s in FUNCS:
-            z=z+function_parse(begin_pos,funcreg)
+            zz+=z
+            z=function_parse(begin_pos,funcreg)
         elif s=='begin':
-            pass
+            zz+=[(z[0][0],z[0][1],5,z[1:]+begin_block_parse())]
+            z=[]
         elif s=='end':
-            while get()!=';':
+            while ended and not get() in [';','.']:
                 pass
             break
     if vars:
-        return [(vars[0][0],'var&const',2,vars)]+z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
+        return [(vars[0][0],'var&const',2,vars)]+zz+z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
     else:
-        return z
+        return zz+z
+
+def begin_block_parse():
+    i = 0
+    s = 'begin'
+    while ended:
+        if s in ['begin','case']:
+            i-=1
+        if s == 'end':
+            i-=1
+            if i == 0:
+                break
+        s = get()
+    while ended and not get() in [';','.']:
+        pass
+    return []
 
 def function_parse(begin_pos,funcreg):
+    def post_clear():
+        while not ended:
+            s = get()
+            if s in FUNCTIONS_DIRECTIVES:
+                while not ended and get()!=';':
+                    pass
+            else:
+                restore(s)
+                break
     f=True
     s=''
     ss=''
@@ -85,7 +109,9 @@ def function_parse(begin_pos,funcreg):
                 break
         if f:
             funcreg.append(s)
+            post_clear()
             return [(begin_pos,s,5,[])]
+    post_clear()
     return []
 
 def uses_block_parse():
@@ -252,6 +278,7 @@ def get_headers(filename, lines):
     ended, line = False, 0
     tokenizer = PasTokenizerStack(lines, False)
     main_data=std_block_parse()
+    #tokenizer.stop()
     if uses:
         yield (uses[0][1],1,'uses',0)
         i=0
