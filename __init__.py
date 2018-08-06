@@ -35,24 +35,24 @@ def std_block_parse(var_at_begin=False):
         if s == '[':
             while not ended and get()!=']':
                 pass
-        elif s == 'uses':
+        elif s.lower() == 'uses':
             uses_block_parse()
-        elif s == 'type':
+        elif s.lower() == 'type':
             z+=type_block_parse()
-        elif s == 'const':
+        elif s.lower() == 'const':
             vars+=const_block_parse()
-        elif s in ['var']+ACCESS_CONTROL:
+        elif s.lower() in ['var']+ACCESS_CONTROL:
             vars+=var_block_parse()
-        elif s in FUNCS:
+        elif s.lower() in FUNCS:
             zz+=z
             z=function_parse(begin_pos,funcreg)
-        elif s == 'begin':
+        elif s.lower() == 'begin':
             if z == []:
                 begin_block_parse()
             else:
                 zz+=[(z[0][0],z[0][1],5,z[1:]+begin_block_parse())]
             z=[]
-        elif s == 'end':
+        elif s.lower() == 'end':
             while ended and not get() in [';','.']:
                 pass
             break
@@ -65,9 +65,9 @@ def begin_block_parse():
     i = 0
     s = 'begin'
     while ended:
-        if s in ['begin','case']:
+        if s.lower() in ['begin','case']:
             i-=1
-        if s == 'end':
+        if s.lower() == 'end':
             i-=1
             if i == 0:
                 break
@@ -80,7 +80,7 @@ def function_parse(begin_pos,funcreg):
     def post_clear():
         while not ended:
             s = get()
-            if s in FUNCTIONS_DIRECTIVES:
+            if s.lower() in FUNCTIONS_DIRECTIVES:
                 while not ended and get()!=';':
                     pass
             else:
@@ -122,7 +122,7 @@ def uses_block_parse():
         s = get()
         if s==';':
             break
-        elif not (s in [',','in'] or is_string(s)):
+        elif not (s.lower() in [',','in'] or is_string(s)):
             uses.append(tuple([s,line]))
 
 def var_block_parse():
@@ -130,22 +130,22 @@ def var_block_parse():
     while not ended:
         s = get()
         current_begin = line
-        if s in ['class','begin','end']+ACCESS_CONTROL+FUNCS+BLOCKS:
+        if s.lower() in ['class','begin','end']+ACCESS_CONTROL+FUNCS+BLOCKS:
             restore(s)
             break
         elif not ended:
             i=0
             while not ended:
                 ss=get()
-                if ss=='packed':
+                if ss.lower()=='packed':
                     ss=get()
-                if s=='specialize':
+                if s.lower()=='specialize':
                     s=get()
-                if ss=='record':
+                if ss.lower()=='record':
                     z=(current_begin,s,7,std_block_parse())
-                if ss=='class':
+                if ss.lower()=='class':
                     ss=get()
-                    if ss=='of':
+                    if ss.lower()=='of':
                         while get()!=';':
                             pass
                         z.append(tuple([begin_pos,objname,1,[]]))
@@ -168,7 +168,7 @@ def const_block_parse():
     while not ended:
         s = get()
         current_begin = line
-        if s in ['class','begin','end']+ACCESS_CONTROL+FUNCS+BLOCKS:
+        if s.lower() in ['class','begin','end']+ACCESS_CONTROL+FUNCS+BLOCKS:
             restore(s)
             break
         elif not ended:
@@ -195,14 +195,14 @@ def type_block_parse():
             update_bp = True
         if s==';':
             continue
-        elif s=='generic':
+        elif s.lower()=='generic':
             s = get()
-        elif s in ['procedure','function','begin']+BLOCKS:
+        elif s.lower() in ['procedure','function','begin']+BLOCKS:
             tokenizer.push([s,[line],[],ended])
             break
-        elif s=='class':
+        elif s.lower()=='class':
             ss=get()
-            if ss=='operator':
+            if ss.lower()=='operator':
                 continue
         elif is_name(s):
             objname=s
@@ -211,13 +211,13 @@ def type_block_parse():
                 continue
             elif ss=='=':
                 s=get()
-                if s=='packed':
+                if s.lower()=='packed':
                     s=get()
-                if s=='specialize':
+                if s.lower()=='specialize':
                     s=get()
                 if s==';':
                     continue
-                elif s=='class':
+                elif s.lower()=='class':
                     ss=get()
                     if ss=='of':
                         while get()!=';':
@@ -229,7 +229,7 @@ def type_block_parse():
                         z.append(tuple([begin_pos,objname,1,class_block_parse()]))
                     else:
                         continue
-                elif s=='record':
+                elif s.lower()=='record':
                     z.append(tuple([begin_pos,objname,1,std_block_parse()]))
                 elif is_name(s):
                     while get()!=';':
@@ -258,7 +258,7 @@ def class_block_parse():
     s = get()
     if ended:
         return []
-    if s in ['absract','sealed']:
+    if s.lower() in ['absract','sealed']:
         s=get()
     if s=='(':
         while not ended and get()!=')':
