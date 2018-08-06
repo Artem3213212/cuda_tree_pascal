@@ -6,7 +6,7 @@ else:
 BLOCKS=['uses','var','const','type']
 FUNCS=['function','procedure','constructor','destructor','operator']
 ACCESS_CONTROL=['private','protected','public','published']
-FUNCTIONS_DIRECTIVES=['reintroduce','overload','virtual','override','abstract','dynamic','inline','assembler','forward']
+FUNCTIONS_DIRECTIVES=['reintroduce','overload','virtual','override','abstract','dynamic','inline','assembler','forward','implementation','interface']
 
 def get():
     global ended, line
@@ -23,7 +23,7 @@ def std_block_parse(var_at_begin=False):
         vars = var_block_parse()
     else:
         vars = []
-    TO_SKIP = ['class','implementation']
+    TO_SKIP = ['class']
     zz=[]
     z=[]
     funcreg=[]
@@ -32,24 +32,27 @@ def std_block_parse(var_at_begin=False):
         begin_pos = line
         if s in TO_SKIP:
             continue
-        if s=='[':
+        if s == '[':
             while not ended and get()!=']':
                 pass
-        elif s=='uses':
+        elif s == 'uses':
             uses_block_parse()
-        elif s=='type':
+        elif s == 'type':
             z+=type_block_parse()
-        elif s=='const':
+        elif s == 'const':
             vars+=const_block_parse()
         elif s in ['var']+ACCESS_CONTROL:
             vars+=var_block_parse()
         elif s in FUNCS:
             zz+=z
             z=function_parse(begin_pos,funcreg)
-        elif s=='begin':
-            zz+=[(z[0][0],z[0][1],5,z[1:]+begin_block_parse())]
+        elif s == 'begin':
+            if z == []:
+                begin_block_parse()
+            else:
+                zz+=[(z[0][0],z[0][1],5,z[1:]+begin_block_parse())]
             z=[]
-        elif s=='end':
+        elif s == 'end':
             while ended and not get() in [';','.']:
                 pass
             break
@@ -302,7 +305,7 @@ def get_headers(filename, lines):
 
 if __name__=="__main__":
     import os
-    for file in os.listdir("tests"):
+    for file in ['jsonconf.pp']:#os.listdir("tests"):
         if file.endswith(".pp") or file.endswith(".pas"):
             print()
             print('test',file)
