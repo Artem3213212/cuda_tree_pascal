@@ -1,1 +1,1 @@
-All tests was taken from free pascal sources.
+All tests were taken from FreePascal sources.

@@ -301,7 +301,7 @@ def get_headers(filename, lines):
 if __name__=="__main__":
     import os
     for file in os.listdir("tests"):
-        if file.endswith(".pp") or file.endswith(".pass"):
+        if file.endswith(".pp") or file.endswith(".pas"):
             print()
             print('test',file)
             ss=open(os.path.join("tests",file),encoding='utf-8').read().split('\n')
