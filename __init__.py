@@ -262,7 +262,10 @@ def class_block_parse():
             pass
     else:
         restore(s)
-
+    s = get()
+    if s == ';':
+        return z
+    restore(s)
     z=z+std_block_parse()
     return z
 
