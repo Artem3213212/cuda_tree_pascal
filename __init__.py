@@ -18,7 +18,7 @@ def restore(s):
     s = tokenizer.push([s,[line],[],ended])
 
 def std_block_parse():
-    TO_SKIP = ['class']
+    TO_SKIP = ['class','reintroduce','overload','virtual','override','abstract','dynamic']
     z=[]
     vars=[]
     funcreg=[]
@@ -67,11 +67,11 @@ def function_parse(begin_pos,funcreg):
             f=False
         s=s+ss
     if ss == '(':
-        while not ended and get()==')':
+        while not ended and not get()==')':
             pass
         ss = get()
-    if ss == ';':
-        while not ended and get()==';':
+    if ss == ':':
+        while not ended and not get()==';':
             pass
     if f:
         f = True
@@ -236,9 +236,11 @@ def get_headers(filename, lines):
 if __name__=="__main__":
     import os
     for file in os.listdir("tests"):
-        if file.endswith(".pp"):
+        if file.endswith(".pp3") or file.endswith(".pas"):
             print()
             print('test',file)
-            ss=open(os.path.join("tests",file)).read().split('\n')
+            ss=open(os.path.join("tests",file),encoding='utf-8').read().split('\n')[485:]#210
+            for i in ss:
+                print(i)
             for i in get_headers('',ss):
                 print(i)
