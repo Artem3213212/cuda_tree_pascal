@@ -23,11 +23,10 @@ def std_block_parse(var_at_begin=False):
         vars = var_block_parse()
     else:
         vars = []
-    TO_SKIP = ['class']
+    TO_SKIP = ['class','implementation']
     zz=[]
     z=[]
     funcreg=[]
-    #current_begin=line
     while not ended:
         s = get().lower()
         begin_pos = line
