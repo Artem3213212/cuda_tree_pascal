@@ -73,7 +73,7 @@ def std_block_parse(var_at_begin=False):
                     if not vars[ii]:
                         vars,v=vars[:ii],vars[ii+1:]
                         if v!=[]:
-                            v=[(v[0][0],NODE_VARS,2,v)]
+                            v=[(v[0][0],NODE_VARS,ICON_VAR,v)]
                         break
                 while i!=0:
                     i-=1
@@ -93,7 +93,7 @@ def std_block_parse(var_at_begin=False):
         if i:
             v.append(i)
     if v:
-        return [(v[0][0],'var&const',ICON_VAR,v)]+z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
+        return [(v[0][0],NODE_VARS,ICON_VAR,v)]+z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
     else:
         return z
 
