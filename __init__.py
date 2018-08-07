@@ -19,6 +19,10 @@ def restore(s):
     s = tokenizer.push([s,[line],[],ended])
 
 def std_block_parse(var_at_begin=False):
+    def clear_vars(v):
+        for i in v:
+            if i:
+                yield i
     if var_at_begin:
         vars = var_block_parse()
     else:
@@ -43,18 +47,29 @@ def std_block_parse(var_at_begin=False):
         elif s.lower() in ['var']+ACCESS_CONTROL:
             vars+=var_block_parse()
         elif s.lower() in FUNCS:
+            vars.append(False)
             z+=function_parse(begin_pos,funcreg)
         elif s.lower() == 'property':
             z+=property_parse()
         elif s.lower() == 'begin':
             z+=begin_block_parse()
-            if ended:
+            if not ended:
+                ii=len(vars)
+                v=[]
+                while ii!=0:
+                    ii-=1
+                    if not vars[ii]:
+                        vars,v=vars[:ii],vars[ii+1:]
+                        if v!=[]:
+                            v=[(v[0][0],'var&const',2,v)]
+                        break
                 i=len(z)
                 while i!=0:
                     i-=1
                     if len(z[i])==5:
                         z, z0, z1 = z[:i], z[i], z[i+1:]
-                        z.append(tuple([z0[0],z0[1],z0[2],z0[3]+z1]))
+                        z.append(tuple([z0[0],z0[1],z0[2],v+z0[3]+z1]))
+                        break
         elif s.lower() == 'end':
             while ended and not get() in [';','.']:
                 pass
@@ -63,7 +78,7 @@ def std_block_parse(var_at_begin=False):
             z+=begin_block_parse()
             break
     if vars:
-        return [(vars[0][0],'var&const',2,vars)]+z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
+        return [(vars[0][0],'var&const',2,clear_vars(vars))]+z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
     else:
         return z
 
@@ -71,16 +86,16 @@ def begin_block_parse():
     global ended
     i = 0
     s = 'begin'
-    while ended:
+    while not ended:
         if s.lower() in ['begin','case']:
-            i-=1
+            i+=1
         if s.lower() == 'end':
             i-=1
             if i == 0:
                 s = get()
                 break
         s = get()
-    while ended and not s in [';','.']:
+    while not ended and not s in [';','.']:
         s = get()
     ended = ended or s=='.'
     return []
@@ -150,24 +165,35 @@ def var_block_parse():
             restore(s)
             break
         elif not ended:
+            s=[s]
+            ss=''
+            while not ended and ss!=":":
+                ss = get()
+                if ss not in [',',':']:
+                    s.append(ss)
             i=0
             while not ended:
                 ss=get()
                 if ss.lower()=='packed':
                     ss=get()
-                if s.lower()=='specialize':
-                    s=get()
+                if ss.lower()=='specialize':
+                    ss=get()
                 if ss.lower()=='record':
-                    z=(current_begin,s,7,std_block_parse())
+                    temp = std_block_parse()
+                    for ii in s:
+                        z.append(tuple([current_begin,ii,7,temp]))
                 if ss.lower()=='class':
                     ss=get()
                     if ss.lower()=='of':
                         while get()!=';':
                             pass
-                        z.append(tuple([begin_pos,objname,1,[]]))
+                        for ii in s:
+                            z.append(tuple([current_begin,ii,1,[]]))
                     elif ss!=';':
                         restore(ss)
-                        z.append(tuple([begin_pos,objname,1,class_block_parse()]))
+                        temp = class_block_parse()
+                        for ii in s:
+                            z.append(tuple([current_begin,ii,1,temp]))
                     else:
                         continue
                 if ss=='(':
@@ -176,7 +202,8 @@ def var_block_parse():
                     i-=1
                 elif ss==';' and i<=0:
                     break
-            z.append(tuple([current_begin,s,7,[]]))
+            for ii in s:
+                z.append(tuple([current_begin,ii,7,[]]))
     return z
 
 def const_block_parse():
@@ -348,11 +375,11 @@ def get_headers(filename, lines):
 
 if __name__=="__main__":
     import os
-    for file in ['jsonreader.pp']:#os.listdir("tests"):
+    for file in ['mytest.pp']:#os.listdir("tests"):
         if file.endswith(".pp") or file.endswith(".pas"):
             print()
             print('test',file)
-            ss=['type']+open(os.path.join("tests",file),encoding='utf-8').read().split('\n')[144:]
+            ss=open(os.path.join("tests",file),encoding='utf-8').read().split('\n')
             for i in get_headers('',ss):
                 print(i)
             break
