@@ -249,6 +249,8 @@ def type_block_parse():
                         continue
                 elif s.lower()=='record':
                     z.append(tuple([begin_pos,objname,1,std_block_parse()]))
+                elif s.lower()=='interface':
+                    z.append(tuple([begin_pos,objname,1,interface_block_parse()]))
                 elif is_name(s):
                     z.append(tuple([begin_pos,objname,1,[]]))
                     i=0
@@ -277,6 +279,27 @@ def type_block_parse():
                 continue
     return z
 
+def interface_block_parse():
+    z=[]
+    s = get()
+    if ended:
+        return []
+    if s=='(':
+        while not ended and get()!=')':
+            pass
+        s = get()
+        if ended:
+            return []
+    if s=='[':
+        while not ended and get()!=']':
+            pass
+        s = get()
+    if s == ';' or ended:
+        return z
+    restore(s)
+    z=z+std_block_parse()
+    return z
+
 def class_block_parse():
     z=[]
     s = get()
@@ -287,9 +310,7 @@ def class_block_parse():
     if s=='(':
         while not ended and get()!=')':
             pass
-    else:
-        restore(s)
-    s = get()
+        s = get()
     if s == ';':
         return z
     restore(s)
