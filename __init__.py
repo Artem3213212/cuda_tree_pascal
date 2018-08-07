@@ -10,7 +10,10 @@ FUNCTIONS_DIRECTIVES=['reintroduce','overload','virtual','override','abstract','
 
 def get():
     global ended, line
-    s = tokenizer.pop()
+    if not ended:
+        s = tokenizer.pop()
+    else:
+        s = tuple([s,[line],[],ended])
     ended = s[3]
     line = s[1][0]
     return s[0]
@@ -48,6 +51,7 @@ def std_block_parse(var_at_begin=False):
         elif s.lower() == 'property':
             z+=property_parse()
         elif s.lower() == 'begin':
+            i=len(z)
             z+=begin_block_parse()
             if not ended:
                 ii=len(vars)
@@ -59,7 +63,6 @@ def std_block_parse(var_at_begin=False):
                         if v!=[]:
                             v=[(v[0][0],'var&const',2,v)]
                         break
-                i=len(z)
                 while i!=0:
                     i-=1
                     if len(z[i])==5:
@@ -73,17 +76,14 @@ def std_block_parse(var_at_begin=False):
         elif s.lower() in ['initialization','finalization']:
             z+=begin_block_parse()
             break
-    zz=[]
     v = []
     for i in vars:
         if i:
             v.append(i)
-    for i in z:
-        zz.append(i[:4])
     if v:
-        return [(v[0][0],'var&const',2,v)]+zz#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
+        return [(v[0][0],'var&const',2,v)]+z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
     else:
-        return zz
+        return z
 
 def begin_block_parse():
     global ended
@@ -359,9 +359,9 @@ def get_headers(filename, lines):
     global uses, out, tokenizer, ended, line
     out, uses = [], []
     ended, line = False, 0
-    tokenizer = PasTokenizerStack(lines, False)
+    tokenizer = PasTokenizerParallelStack(lines, False)
     main_data=std_block_parse()
-    #tokenizer.stop()
+    tokenizer.stop()
     if uses:
         yield (uses[0][1],1,'uses',0)
         i=0
