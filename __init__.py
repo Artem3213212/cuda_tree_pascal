@@ -24,7 +24,7 @@ def get():
     if not ended:
         s = tokenizer.pop()
     else:
-        s = tuple([s,[line],[],ended])
+        s = ('',[line],[],ended)
     ended = s[3]
     line = s[1][0]
     return s[0]
@@ -78,7 +78,7 @@ def std_block_parse(var_at_begin=False):
                     i-=1
                     if len(z[i])==5:
                         z, z0, z1 = z[:i], z[i], z[i+1:]
-                        z.append(tuple([z0[0],z0[1],z0[2],v+z0[3]+z1]))
+                        z.append((z0[0],z0[1],z0[2],v+z0[3]+z1))
                         break
         elif s.lower() == 'end':
             while ended and not get() in [';','.']:
@@ -173,7 +173,7 @@ def uses_block_parse():
         if s==';':
             break
         elif not (s.lower() in [',','in'] or is_string(s)):
-            uses.append(tuple([s,line]))
+            uses.append((s,line))
 
 def var_block_parse():
     z=[]
@@ -200,19 +200,19 @@ def var_block_parse():
                 if ss.lower()=='record':
                     temp = std_block_parse()
                     for ii in s:
-                        z.append(tuple([current_begin,ii,ICON_VAR_IN,temp]))
+                        z.append((current_begin,ii,ICON_VAR_IN,temp))
                 if ss.lower()=='class':
                     ss=get()
                     if ss.lower()=='of':
                         while get()!=';':
                             pass
                         for ii in s:
-                            z.append(tuple([current_begin,ii,ICON_CLASS,[]]))
+                            z.append((current_begin,ii,ICON_CLASS,[]))
                     elif ss!=';':
                         restore(ss)
                         temp = class_block_parse()
                         for ii in s:
-                            z.append(tuple([current_begin,ii,ICON_CLASS,temp]))
+                            z.append((current_begin,ii,ICON_CLASS,temp))
                     else:
                         continue
                 if ss=='(':
@@ -222,7 +222,7 @@ def var_block_parse():
                 elif ss==';' and i<=0:
                     break
             for ii in s:
-                z.append(tuple([current_begin,ii,ICON_VAR_IN,[]]))
+                z.append((current_begin,ii,ICON_VAR_IN,[]))
     return z
 
 def const_block_parse():
@@ -243,7 +243,7 @@ def const_block_parse():
                     i-=1
                 elif ss==';' and i<=0:
                     break
-            z.append(tuple([current_begin,s,ICON_CONST_IN,[]]))
+            z.append((current_begin,s,ICON_CONST_IN,[]))
     return z
 
 def type_block_parse():
@@ -284,19 +284,18 @@ def type_block_parse():
                     if ss=='of':
                         while get()!=';':
                             pass
-                        z.append(tuple([begin_pos,objname,ICON_CLASS,[]]))
+                        z.append((begin_pos,objname,ICON_CLASS,[]))
                     elif ss!=';':
-                        #out.append(tuple([begin_pos,level,objname,1]))
                         restore(ss)
-                        z.append(tuple([begin_pos,objname,ICON_CLASS,class_block_parse()]))
+                        z.append((begin_pos,objname,ICON_CLASS,class_block_parse()))
                     else:
                         continue
                 elif s.lower()=='record':
-                    z.append(tuple([begin_pos,objname,ICON_RECORD,std_block_parse()]))
+                    z.append((begin_pos,objname,ICON_RECORD,std_block_parse()))
                 elif s.lower()=='interface':
-                    z.append(tuple([begin_pos,objname,ICON_INTERFACE,interface_block_parse()]))
+                    z.append((begin_pos,objname,ICON_INTERFACE,interface_block_parse()))
                 elif is_name(s):
-                    z.append(tuple([begin_pos,objname,ICON_TYPE_IN,[]]))
+                    z.append((begin_pos,objname,ICON_TYPE_IN,[]))
                     i=0
                     while s!=';' or i!=0:
                         s = get()
