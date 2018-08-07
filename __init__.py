@@ -18,6 +18,7 @@ ICON_VAR = 2
 ICON_VAR_IN = 7
 ICON_CONST_IN = 7
 ICON_FUNC = 5
+NODE_VARS = 'var&const'
 
 def get():
     global ended, line
@@ -72,7 +73,7 @@ def std_block_parse(var_at_begin=False):
                     if not vars[ii]:
                         vars,v=vars[:ii],vars[ii+1:]
                         if v!=[]:
-                            v=[(v[0][0],'var&const',2,v)]
+                            v=[(v[0][0],NODE_VARS,2,v)]
                         break
                 while i!=0:
                     i-=1
