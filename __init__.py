@@ -234,8 +234,14 @@ def type_block_parse():
                 elif s.lower()=='record':
                     z.append(tuple([begin_pos,objname,1,std_block_parse()]))
                 elif is_name(s):
-                    while get()!=';':
-                        pass
+                    z.append(tuple([begin_pos,objname,1,[]]))
+                    i=0
+                    while s!=';' or i!=0:
+                        s = get()
+                        if s=='(':
+                            i+=1
+                        elif s==')':
+                            i-=1
                     continue
             elif ss=='<':
                 ss=get()
@@ -307,7 +313,7 @@ def get_headers(filename, lines):
 
 if __name__=="__main__":
     import os
-    for file in ['jsonconf.pp']:#os.listdir("tests"):
+    for file in ['jsonreader.pp']:#os.listdir("tests"):
         if file.endswith(".pp") or file.endswith(".pas"):
             print()
             print('test',file)
