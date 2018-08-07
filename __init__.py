@@ -47,7 +47,7 @@ def std_block_parse(var_at_begin=False):
             zz+=z
             z=function_parse(begin_pos,funcreg)
         elif s.lower() == 'property':
-            pass
+            z+=property_parse()
         elif s.lower() == 'begin':
             if z == []:
                 begin_block_parse()
@@ -120,6 +120,19 @@ def function_parse(begin_pos,funcreg):
             return [(begin_pos,s,5,[])]
     post_clear()
     return []
+
+def property_parse():
+    begin_pos = line
+    name = get()
+    i = 0
+    s = ''
+    while i!=0 or s!=';':
+        s = get()
+        if s == '[':
+            i+=1
+        if s == ']':
+            i-=1
+    return [(begin_pos,name,6,[])]
 
 def uses_block_parse():
     global uses
