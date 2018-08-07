@@ -24,7 +24,6 @@ def std_block_parse(var_at_begin=False):
     else:
         vars = []
     TO_SKIP = ['class','implementation','interface']
-    zz=[]
     z=[]
     funcreg=[]
     while not ended:
@@ -39,21 +38,23 @@ def std_block_parse(var_at_begin=False):
             uses_block_parse()
         elif s.lower() == 'type':
             z+=type_block_parse()
-        elif s.lower() == 'const':
+        elif s.lower() in ['const','resourcestring']:
             vars+=const_block_parse()
         elif s.lower() in ['var']+ACCESS_CONTROL:
             vars+=var_block_parse()
         elif s.lower() in FUNCS:
-            zz+=z
-            z=function_parse(begin_pos,funcreg)
+            z+=function_parse(begin_pos,funcreg)
         elif s.lower() == 'property':
             z+=property_parse()
         elif s.lower() == 'begin':
-            if z == []:
-                begin_block_parse()
-            else:
-                zz+=[(z[0][0],z[0][1],5,z[1:]+begin_block_parse())]
-            z=[]
+            z+=begin_block_parse()
+            if ended:
+                i=len(z)
+                while i!=0:
+                    i-=1
+                    if len(z[i])==5:
+                        z, z0, z1 = z[:i], z[i], z[i+1:]
+                        z.append(tuple([z0[0],z0[1],z0[2],z0[3]+z1]))
         elif s.lower() == 'end':
             while ended and not get() in [';','.']:
                 pass
@@ -62,11 +63,12 @@ def std_block_parse(var_at_begin=False):
             z+=begin_block_parse()
             break
     if vars:
-        return [(vars[0][0],'var&const',2,vars)]+zz+z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
+        return [(vars[0][0],'var&const',2,vars)]+z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
     else:
-        return zz+z
+        return z
 
 def begin_block_parse():
+    global ended
     i = 0
     s = 'begin'
     while ended:
@@ -75,10 +77,12 @@ def begin_block_parse():
         if s.lower() == 'end':
             i-=1
             if i == 0:
+                s = get()
                 break
         s = get()
-    while ended and not get() in [';','.']:
-        pass
+    while ended and not s in [';','.']:
+        s = get()
+    ended = ended or s=='.'
     return []
 
 def function_parse(begin_pos,funcreg):
@@ -91,15 +95,12 @@ def function_parse(begin_pos,funcreg):
             else:
                 restore(s)
                 break
-    f=True
     s=''
     ss=''
     while not ended:
         ss = get()
         if ss in ['(',':',';']:
             break
-        elif ss=='.':
-            f=False
         s=s+ss
     if ss == '(':
         while not ended and not get()==')':
@@ -108,18 +109,15 @@ def function_parse(begin_pos,funcreg):
     if ss == ':':
         while not ended and not get()==';':
             pass
+    f = True
+    for i in funcreg:
+        if i==s:
+            f = False
+            break
     if f:
-        f = True
-        for i in funcreg:
-            if i==s:
-                f = False
-                break
-        if f:
-            funcreg.append(s)
-            post_clear()
-            return [(begin_pos,s,5,[])]
+        funcreg.append(s)
     post_clear()
-    return []
+    return [(begin_pos,s,5,[],-1)]
 
 def property_parse():
     begin_pos = line
@@ -215,7 +213,7 @@ def type_block_parse():
             continue
         elif s.lower()=='generic':
             s = get()
-        elif s.lower() in ['procedure','function','begin']+BLOCKS:
+        elif s.lower() in ['procedure','function','begin','implementation','interface','initialization','finalization','property']+BLOCKS:
             tokenizer.push([s,[line],[],ended])
             break
         elif s.lower()=='class':
@@ -354,7 +352,7 @@ if __name__=="__main__":
         if file.endswith(".pp") or file.endswith(".pas"):
             print()
             print('test',file)
-            ss=open(os.path.join("tests",file),encoding='utf-8').read().split('\n')
+            ss=['type']+open(os.path.join("tests",file),encoding='utf-8').read().split('\n')[144:]
             for i in get_headers('',ss):
                 print(i)
             break
