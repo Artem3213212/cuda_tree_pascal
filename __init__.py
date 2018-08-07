@@ -46,6 +46,8 @@ def std_block_parse(var_at_begin=False):
         elif s.lower() in FUNCS:
             zz+=z
             z=function_parse(begin_pos,funcreg)
+        elif s.lower() == 'property':
+            pass
         elif s.lower() == 'begin':
             if z == []:
                 begin_block_parse()
@@ -57,6 +59,7 @@ def std_block_parse(var_at_begin=False):
                 pass
             break
         elif s.lower() in ['initialization','finalization']:
+            z+=begin_block_parse()
             break
     if vars:
         return [(vars[0][0],'var&const',2,vars)]+zz+z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
@@ -132,7 +135,7 @@ def var_block_parse():
     while not ended:
         s = get()
         current_begin = line
-        if s.lower() in ['class','begin','end','implementation','interface','initialization','finalization']+ACCESS_CONTROL+FUNCS+BLOCKS:
+        if s.lower() in ['class','begin','end','implementation','interface','initialization','finalization','property']+ACCESS_CONTROL+FUNCS+BLOCKS:
             restore(s)
             break
         elif not ended:
@@ -170,7 +173,7 @@ def const_block_parse():
     while not ended:
         s = get()
         current_begin = line
-        if s.lower() in ['class','begin','end','implementation','interface','initialization','finalization']+ACCESS_CONTROL+FUNCS+BLOCKS:
+        if s.lower() in ['class','begin','end','implementation','interface','initialization','finalization','property']+ACCESS_CONTROL+FUNCS+BLOCKS:
             restore(s)
             break
         elif not ended:
