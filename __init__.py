@@ -19,10 +19,6 @@ def restore(s):
     s = tokenizer.push([s,[line],[],ended])
 
 def std_block_parse(var_at_begin=False):
-    def clear_vars(v):
-        for i in v:
-            if i:
-                yield i
     if var_at_begin:
         vars = var_block_parse()
     else:
@@ -77,16 +73,28 @@ def std_block_parse(var_at_begin=False):
         elif s.lower() in ['initialization','finalization']:
             z+=begin_block_parse()
             break
-    if vars:
-        return [(vars[0][0],'var&const',2,clear_vars(vars))]+z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
+    zz=[]
+    v = []
+    for i in vars:
+        if i:
+            v.append(i)
+    for i in z:
+        zz.append(i[:4])
+    if v:
+        return [(v[0][0],'var&const',2,v)]+zz#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
     else:
-        return z
+        return zz
 
 def begin_block_parse():
     global ended
+    z = []
     i = 0
     s = 'begin'
     while not ended:
+        if s.lower() in FUNCS:
+            restore('anonymous method')
+            restore(s)
+            z+=std_block_parse()
         if s.lower() in ['begin','case']:
             i+=1
         if s.lower() == 'end':
@@ -98,7 +106,7 @@ def begin_block_parse():
     while not ended and not s in [';','.']:
         s = get()
     ended = ended or s=='.'
-    return []
+    return z
 
 def function_parse(begin_pos,funcreg):
     def post_clear():
