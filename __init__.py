@@ -7,6 +7,17 @@ BLOCKS=['uses','var','const','type']
 FUNCS=['function','procedure','constructor','destructor','operator']
 ACCESS_CONTROL=['private','protected','public','published']
 FUNCTIONS_DIRECTIVES=['reintroduce','overload','virtual','override','abstract','dynamic','inline','assembler','forward','interface']
+ICON_USES = 0
+ICON_USES_IN = 4
+ICON_CLASS = 1
+ICON_RECORD = 1
+ICON_TYPE_IN = 1
+ICON_PROPERTY = 6
+ICON_INTERFACE = 1
+ICON_VAR = 2
+ICON_VAR_IN = 7
+ICON_CONST_IN = 7
+ICON_FUNC = 5
 
 def get():
     global ended, line
@@ -81,7 +92,7 @@ def std_block_parse(var_at_begin=False):
         if i:
             v.append(i)
     if v:
-        return [(v[0][0],'var&const',2,v)]+z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
+        return [(v[0][0],'var&const',ICON_VAR,v)]+z#(current_begin,'block',0,z)#(current_begin,'name',icon,z)
     else:
         return z
 
@@ -140,7 +151,7 @@ def function_parse(begin_pos,funcreg):
     if f:
         funcreg.append(s)
     post_clear()
-    return [(begin_pos,s,5,[],-1)]
+    return [(begin_pos,s,ICON_FUNC,[],-1)]
 
 def property_parse():
     begin_pos = line
@@ -153,7 +164,7 @@ def property_parse():
             i+=1
         if s == ']':
             i-=1
-    return [(begin_pos,name,6,[])]
+    return [(begin_pos,name,ICON_PROPERTY,[])]
 
 def uses_block_parse():
     global uses
@@ -189,19 +200,19 @@ def var_block_parse():
                 if ss.lower()=='record':
                     temp = std_block_parse()
                     for ii in s:
-                        z.append(tuple([current_begin,ii,7,temp]))
+                        z.append(tuple([current_begin,ii,ICON_VAR_IN,temp]))
                 if ss.lower()=='class':
                     ss=get()
                     if ss.lower()=='of':
                         while get()!=';':
                             pass
                         for ii in s:
-                            z.append(tuple([current_begin,ii,1,[]]))
+                            z.append(tuple([current_begin,ii,ICON_CLASS,[]]))
                     elif ss!=';':
                         restore(ss)
                         temp = class_block_parse()
                         for ii in s:
-                            z.append(tuple([current_begin,ii,1,temp]))
+                            z.append(tuple([current_begin,ii,ICON_CLASS,temp]))
                     else:
                         continue
                 if ss=='(':
@@ -211,7 +222,7 @@ def var_block_parse():
                 elif ss==';' and i<=0:
                     break
             for ii in s:
-                z.append(tuple([current_begin,ii,7,[]]))
+                z.append(tuple([current_begin,ii,ICON_VAR_IN,[]]))
     return z
 
 def const_block_parse():
@@ -232,7 +243,7 @@ def const_block_parse():
                     i-=1
                 elif ss==';' and i<=0:
                     break
-            z.append(tuple([current_begin,s,7,[]]))
+            z.append(tuple([current_begin,s,ICON_CONST_IN,[]]))
     return z
 
 def type_block_parse():
@@ -273,19 +284,19 @@ def type_block_parse():
                     if ss=='of':
                         while get()!=';':
                             pass
-                        z.append(tuple([begin_pos,objname,1,[]]))
+                        z.append(tuple([begin_pos,objname,ICON_CLASS,[]]))
                     elif ss!=';':
                         #out.append(tuple([begin_pos,level,objname,1]))
                         restore(ss)
-                        z.append(tuple([begin_pos,objname,1,class_block_parse()]))
+                        z.append(tuple([begin_pos,objname,ICON_CLASS,class_block_parse()]))
                     else:
                         continue
                 elif s.lower()=='record':
-                    z.append(tuple([begin_pos,objname,1,std_block_parse()]))
+                    z.append(tuple([begin_pos,objname,ICON_RECORD,std_block_parse()]))
                 elif s.lower()=='interface':
-                    z.append(tuple([begin_pos,objname,1,interface_block_parse()]))
+                    z.append(tuple([begin_pos,objname,ICON_INTERFACE,interface_block_parse()]))
                 elif is_name(s):
-                    z.append(tuple([begin_pos,objname,1,[]]))
+                    z.append(tuple([begin_pos,objname,ICON_TYPE_IN,[]]))
                     i=0
                     while s!=';' or i!=0:
                         s = get()
@@ -356,14 +367,14 @@ def table_print(level, data):
         yield from table_print(level+1,i[3])
 
 def get_headers(filename, lines):
-    global uses, out, tokenizer, ended, line
+    global uses, tokenizer, ended, line
     out, uses = [], []
     ended, line = False, 0
     tokenizer = PasTokenizerParallelStack(lines, False)
     main_data=std_block_parse()
     tokenizer.stop()
     if uses:
-        yield (uses[0][1],1,'uses',0)
+        yield (uses[0][1],1,'uses',ICON_USES)
         i=0
         while i!=len(uses):
             if i==0:
@@ -376,10 +387,8 @@ def get_headers(filename, lines):
                     yield (s[1],2,s[0],4)
                     s=uses[i]
             i+=1
-        yield (s[1],2,s[0],4)
+        yield (s[1],2,s[0],ICON_USES_IN)
     yield from table_print(1,main_data)
-    for i in out:
-        yield i
 
 if __name__=="__main__":
     import os
