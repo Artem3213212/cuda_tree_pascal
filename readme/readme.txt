@@ -10,9 +10,10 @@ Can parse and show these Pascal entities:
 - classes, nested into another classes (nesting level can be 2 or more)
 - var/const declarations, both global and local in funcs/methods
 - uses (both interface/implementation, under single node)
+- properties
 - interfaces
 - resourcestrings
-- properties
+- anonymous functions
 
 
 Author: Artem Gavrilov (@Artem3213212 at GitHub)
