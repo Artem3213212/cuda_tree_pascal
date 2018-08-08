@@ -7,14 +7,15 @@ Can parse and show these Pascal entities:
 - standalone functions/procedures
 - class methods
 - classes
-- classes, nested into another classes (nesting level can be 2 or more)
+- nested classes (nesting level: 2 or more)
+- nested functions (nesting level: 2 or more)
 - records
 - interfaces
-- var/const declarations, global and local in funcs/methods
+- var/const declarations, global and local (in funcs/methods)
 - properties
 - uses (both interface/implementation, shown under single node)
 - resourcestrings
-- anonymous functions
+- anonymous funcs/methods
 - procedural types
 
 
