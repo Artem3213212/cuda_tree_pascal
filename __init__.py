@@ -396,7 +396,7 @@ def table_print(level, name, data):
                     break
             if f:
                 yield (i[0],level,i[1],i[2])
-                yield from table_print(level+1,data[currpos][1],data[currpos][3])
+                yield from table_print(level+1,i[1],i[3])
             continue
         yield (i[0],level,i[1],i[2])
         yield from table_print(level+1,name+'.'+i[1],i[3])
@@ -428,11 +428,10 @@ def get_headers(filename, lines):
 
 if __name__=="__main__":
     import os
-    for file in ['jsonreader.pp']:#os.listdir("tests"):
+    for file in os.listdir("tests"):
         if file.endswith(".pp") or file.endswith(".pas"):
             print()
             print('test',file)
             ss=open(os.path.join("tests",file),encoding='utf-8').read().split('\n')
             for i in get_headers('',ss):
                 print(i)
-            break
