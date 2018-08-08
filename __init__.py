@@ -361,13 +361,49 @@ def class_block_parse():
     z=z+std_block_parse()
     return z
 
-def table_print(level, data):
+def main_table_print(data):
+    global currpos, main_data
+    main_data=data
+    for currpos in range(len(data)):
+        if len(data[currpos])==2:
+            continue
+        if len(data[currpos])==5:
+            f=True
+            for ii in range(len(main_data)-1,currpos,-1):
+                if main_data[ii][1]==data[currpos][1]:
+                    yield (main_data[ii][0],1,data[currpos][1],data[currpos][2])
+                    yield from table_print(2,' ',main_data[ii][3])
+                    main_data[ii]=[0,0]
+                    f=False
+                    break
+            if f:
+                yield (data[currpos][0],1,data[currpos][1],data[currpos][2])
+                yield from table_print(2,data[currpos][1],data[currpos][3])
+            continue
+        yield (data[currpos][0],1,data[currpos][1],data[currpos][2])
+        yield from table_print(2,data[currpos][1],data[currpos][3])
+
+def table_print(level, name, data):
     for i in data:
+        if len(i)==5:
+            f=True
+            for ii in range(len(main_data)-1,currpos,-1):
+                if main_data[ii][1]==name+'.'+i[1]:
+                    yield (main_data[ii][0],level,i[1],i[2])
+                    yield from table_print(level+1,' ',main_data[ii][3])
+                    main_data[ii]=[0,0]
+                    f=False
+                    break
+            if f:
+                yield (i[0],level,i[1],i[2])
+                yield from table_print(level+1,data[currpos][1],data[currpos][3])
+            continue
         yield (i[0],level,i[1],i[2])
-        yield from table_print(level+1,i[3])
+        yield from table_print(level+1,name+'.'+i[1],i[3])
 
 def get_headers(filename, lines):
     global uses, tokenizer, ended, line
+    #return []
     out, uses = [], []
     ended, line = False, 0
     tokenizer = PasTokenizerParallelStack(lines, False)
@@ -388,11 +424,11 @@ def get_headers(filename, lines):
                     s=uses[i]
             i+=1
         yield (s[1],2,s[0],ICON_USES_IN)
-    yield from table_print(1,main_data)
+    yield from main_table_print(main_data)
 
 if __name__=="__main__":
     import os
-    for file in ['mytest.pp']:#os.listdir("tests"):
+    for file in ['jsonreader.pp']:#os.listdir("tests"):
         if file.endswith(".pp") or file.endswith(".pas"):
             print()
             print('test',file)
