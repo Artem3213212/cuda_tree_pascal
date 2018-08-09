@@ -25,13 +25,14 @@ def get():
     if not ended:
         s = tokenizer.pop()
     else:
-        s = ('',[line],[],ended)
+        s = ('',(line[1],line[0]),(line[3],line[2]),ended)
     ended = s[3]
-    line = s[1][0]
+    #print(s)
+    line = (s[1][1],s[1][0],s[2][1],s[2][0])
     return s[0]
 
 def restore(s):
-    s = tokenizer.push([s,[line],[],ended])
+    s = tokenizer.push((s,(line[1],line[0]),(line[3],line[2]),ended))
 
 def std_block_parse(var_at_begin=False):
     if var_at_begin:
@@ -261,7 +262,7 @@ def type_block_parse():
         elif s.lower()=='generic':
             s = get()
         elif s.lower() in ['procedure','function','begin','implementation','interface','initialization','finalization','property']+BLOCKS:
-            tokenizer.push([s,[line],[],ended])
+            tokenizer.push((s,(line[1],line[0]),(line[3],line[2]),ended))
             break
         elif s.lower()=='class':
             ss=get()
