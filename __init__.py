@@ -108,7 +108,7 @@ def begin_block_parse():
             restore('anonymous method')
             restore(s)
             z+=std_block_parse()
-        if s.lower() in ['begin','case']:
+        if s.lower() in ['begin','case','try']:
             i+=1
         if s.lower() == 'end':
             i-=1
@@ -429,10 +429,10 @@ def get_headers(filename, lines):
 
 if __name__=="__main__":
     import os
-    for file in os.listdir("tests"):
+    for file in ['jsonconf.pp']:#os.listdir("tests"):
         if file.endswith(".pp") or file.endswith(".pas"):
             print()
             print('test',file)
-            ss=open(os.path.join("tests",file),encoding='utf-8').read().split('\n')
+            ss=open(os.path.join("tests",file),encoding='utf-8').read().split('\n')[181:]
             for i in get_headers('',ss):
                 print(i)
