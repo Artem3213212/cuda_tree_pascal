@@ -17,6 +17,10 @@ Can parse and show these Pascal entities:
 - anonymous funcs/methods
 - type declarations (enums/arrays/records/etc)
 
+It was tested on:
+- several FreePascal units (FPJson, RegExpr etc)
+- private 3K lines project, with anonym functions with nested usual functions
+
 
 Author: Artem Gavrilov (@Artem3213212 at GitHub)
 License: MIT
