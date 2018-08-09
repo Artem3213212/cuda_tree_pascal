@@ -18,7 +18,8 @@ ICON_VAR = 2
 ICON_VAR_IN = 7
 ICON_CONST_IN = 7
 ICON_FUNC = 5
-NODE_VARS = 'var&const'
+NODE_VARS = 'var/const'
+NODE_ANONYM = 'anonym'
 
 def get():
     global ended, line
@@ -34,7 +35,7 @@ def get():
 def restore(s):
     s = tokenizer.push((s,(line[1],line[0]),(line[3],line[2]),ended))
 
-def std_block_parse(var_at_begin=False):
+def std_block_parse(var_at_begin=False,LowStop=False):
     if var_at_begin:
         vars = var_block_parse()
     else:
@@ -82,6 +83,8 @@ def std_block_parse(var_at_begin=False):
                         z, z0, z1 = z[:i], z[i], z[i+1:]
                         z.append((z0[0],z0[1],z0[2],v+z0[3]+z1))
                         break
+            if len(z)==1 and LowStop:
+                break
         elif s.lower() == 'end':
             while not ended and not get() in [';','.']:
                 pass
@@ -105,10 +108,10 @@ def begin_block_parse():
     s = 'begin'
     while not ended:
         if s.lower() in FUNCS:
-            restore('anonymous method')
+            restore(NODE_ANONIM)
             restore(s)
-            z+=std_block_parse()
-        if s.lower() in ['begin','case','try']:
+            z+=std_block_parse(LowStop=True)
+        if s.lower() in ['begin','case','try','asm']:
             i+=1
         if s.lower() == 'end':
             i-=1
@@ -116,9 +119,9 @@ def begin_block_parse():
                 s = get()
                 break
         s = get()
-    while not ended and not s in [';','.']:
-        s = get()
-    ended = ended or s=='.'
+    #while not ended and not s in [';','.']:
+    #    s = get()
+    #ended = ended or s=='.'
     return z
 
 def function_parse(begin_pos,funcreg):
@@ -135,7 +138,7 @@ def function_parse(begin_pos,funcreg):
     ss=''
     while not ended:
         ss = get()
-        if ss in ['(',':',';']:
+        if ss in ['(',':',';','begin']+FUNCS+BLOCKS:
             break
         s=s+ss
     if ss == '(':
@@ -145,6 +148,10 @@ def function_parse(begin_pos,funcreg):
     if ss == ':':
         while not ended and not get()==';':
             pass
+    if ss in ['begin']+FUNCS+BLOCKS:
+        restore(ss)
+        post_clear()
+        return [(begin_pos,s,ICON_FUNC,[],-1)]
     f = True
     for i in funcreg:
         if i==s:
@@ -407,7 +414,6 @@ def table_print(level, name, data):
 
 def get_headers(filename, lines):
     global uses, tokenizer, ended, line
-    #return []
     out, uses = [], []
     ended, line = False, 0
     tokenizer = PasTokenizerParallelStack(lines, False)
@@ -436,6 +442,8 @@ if __name__=="__main__":
         if file.endswith(".pp") or file.endswith(".pas"):
             print()
             print('test',file)
-            ss=open(os.path.join("tests",file),encoding='utf-8').read().split('\n')
+            #ss=open(os.path.join("tests",file),encoding='utf-8').read().split('\n')
+            ss=open('W:\\AGEngineAplha0.1.4\\Sources\\lib\\AG.Graphic.pas').read().split('\n')[973:]
             for i in get_headers('',ss):
                 print(i)
+            break
