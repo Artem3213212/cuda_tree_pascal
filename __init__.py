@@ -296,9 +296,12 @@ def type_block_parse():
                     z.append((begin_pos,objname,ICON_RECORD,std_block_parse()))
                 elif s.lower()=='interface':
                     z.append((begin_pos,objname,ICON_INTERFACE,interface_block_parse()))
-                elif is_name(s):
+                else:
                     z.append((begin_pos,objname,ICON_TYPE_IN,[]))
-                    i=0
+                    if s=='(':
+                        i=1
+                    else:
+                        i=0
                     while not ended and(s!=';' or i!=0):
                         s = get()
                         if s=='(':
@@ -429,10 +432,10 @@ def get_headers(filename, lines):
 
 if __name__=="__main__":
     import os
-    for file in ['jsonconf.pp']:#os.listdir("tests"):
+    for file in ['jsonscanner.pp']:#os.listdir("tests"):
         if file.endswith(".pp") or file.endswith(".pas"):
             print()
             print('test',file)
-            ss=open(os.path.join("tests",file),encoding='utf-8').read().split('\n')[181:]
+            ss=open(os.path.join("tests",file),encoding='utf-8').read().split('\n')
             for i in get_headers('',ss):
                 print(i)
