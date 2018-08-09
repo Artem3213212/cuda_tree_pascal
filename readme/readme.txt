@@ -4,16 +4,19 @@ Requires plugin CudaTree to work.
 Based on Python library PyPascalTokenizer.
 
 Can parse and show these Pascal entities:
-- standalone function/procedure
-- class methods (func/proc/constructor/destructor)
+- standalone functions/procedures
+- class methods
 - classes
-- classes, nested into another classes (nesting level can be 2 or more)
-- var/const declarations, both global and local in funcs/methods
-- uses (both interface/implementation, under single node)
-- properties
+- nested classes (nesting level: 2 or more)
+- nested functions (nesting level: 2 or more)
+- records
 - interfaces
+- var/const declarations, global and local (in funcs/methods)
+- properties
+- uses (both interface/implementation, shown under single node)
 - resourcestrings
-- anonymous functions
+- anonymous funcs/methods
+- procedural types
 
 
 Author: Artem Gavrilov (@Artem3213212 at GitHub)
