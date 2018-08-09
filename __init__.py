@@ -68,21 +68,21 @@ def std_block_parse(var_at_begin=False):
             if not ended:
                 ii=len(vars)
                 v=[]
-                while ii!=0:
+                while not ended and ii!=0:
                     ii-=1
                     if not vars[ii]:
                         vars,v=vars[:ii],vars[ii+1:]
                         if v!=[]:
                             v=[(v[0][0],NODE_VARS,ICON_VAR,v)]
                         break
-                while i!=0:
+                while  not ended and i!=0:
                     i-=1
                     if len(z[i])==5:
                         z, z0, z1 = z[:i], z[i], z[i+1:]
                         z.append((z0[0],z0[1],z0[2],v+z0[3]+z1))
                         break
         elif s.lower() == 'end':
-            while ended and not get() in [';','.']:
+            while not ended and not get() in [';','.']:
                 pass
             break
         elif s.lower() in ['initialization','finalization']:
@@ -159,7 +159,7 @@ def property_parse():
     name = get()
     i = 0
     s = ''
-    while i!=0 or s!=';':
+    while not ended and(i!=0 or s!=';'):
         s = get()
         if s == '[':
             i+=1
@@ -205,7 +205,7 @@ def var_block_parse():
                 if ss.lower()=='class':
                     ss=get()
                     if ss.lower()=='of':
-                        while get()!=';':
+                        while not ended and get()!=';':
                             pass
                         for ii in s:
                             z.append((current_begin,ii,ICON_CLASS,[]))
@@ -283,7 +283,7 @@ def type_block_parse():
                 elif s.lower()=='class':
                     ss=get()
                     if ss=='of':
-                        while get()!=';':
+                        while not ended and get()!=';':
                             pass
                         z.append((begin_pos,objname,ICON_CLASS,[]))
                     elif ss!=';':
@@ -298,7 +298,7 @@ def type_block_parse():
                 elif is_name(s):
                     z.append((begin_pos,objname,ICON_TYPE_IN,[]))
                     i=0
-                    while s!=';' or i!=0:
+                    while not ended and(s!=';' or i!=0):
                         s = get()
                         if s=='(':
                             i+=1
@@ -308,7 +308,7 @@ def type_block_parse():
             elif ss=='<':
                 ss=get()
                 i=1
-                while True:
+                while not ended:
                     if ss=='>':
                         i-=1
                     elif ss=='<':
