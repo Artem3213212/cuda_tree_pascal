@@ -19,7 +19,7 @@ ICON_VAR_IN = 7
 ICON_CONST_IN = 7
 ICON_FUNC = 5
 NODE_VARS = 'var/const'
-NODE_ANONYM = 'anonym'
+NODE_ANON = 'anonym'
 
 def get():
     global ended, line
@@ -108,7 +108,7 @@ def begin_block_parse():
     s = 'begin'
     while not ended:
         if s.lower() in FUNCS:
-            restore(NODE_ANONIM)
+            restore(NODE_ANON)
             restore(s)
             z+=std_block_parse(LowStop=True)
         if s.lower() in ['begin','case','try','asm']:
