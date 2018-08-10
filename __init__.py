@@ -200,6 +200,7 @@ def var_block_parse():
                 if ss not in [',',':']:
                     s.append(ss)
             i=0
+            f=True
             while not ended:
                 ss=get()
                 if ss.lower()=='packed':
@@ -207,9 +208,11 @@ def var_block_parse():
                 if ss.lower()=='specialize':
                     ss=get()
                 if ss.lower()=='record':
-                    temp = std_block_parse()
+                    temp = std_block_parse(var_at_begin=True)
                     for ii in s:
                         z.append((current_begin,ii,ICON_VAR_IN,temp))
+                    f=False
+                    break
                 if ss.lower()=='class':
                     ss=get()
                     if ss.lower()=='of':
@@ -217,11 +220,15 @@ def var_block_parse():
                             pass
                         for ii in s:
                             z.append((current_begin,ii,ICON_CLASS,[]))
+                        f=False
+                        break
                     elif ss!=';':
                         restore(ss)
                         temp = class_block_parse()
                         for ii in s:
                             z.append((current_begin,ii,ICON_CLASS,temp))
+                        f=False
+                        break
                     else:
                         continue
                 if ss=='(':
@@ -230,8 +237,9 @@ def var_block_parse():
                     i-=1
                 elif ss==';' and i<=0:
                     break
-            for ii in s:
-                z.append((current_begin,ii,ICON_VAR_IN,[]))
+            if f:
+                for ii in s:
+                    z.append((current_begin,ii,ICON_VAR_IN,[]))
     return z
 
 def const_block_parse():
@@ -300,7 +308,7 @@ def type_block_parse():
                     else:
                         continue
                 elif s.lower()=='record':
-                    z.append((begin_pos,objname,ICON_RECORD,std_block_parse()))
+                    z.append((begin_pos,objname,ICON_RECORD,std_block_parse(var_at_begin=True)))
                 elif s.lower()=='interface':
                     z.append((begin_pos,objname,ICON_INTERFACE,interface_block_parse()))
                 else:
@@ -369,7 +377,7 @@ def class_block_parse():
     if s == ';':
         return z
     restore(s)
-    z=z+std_block_parse()
+    z=z+std_block_parse(var_at_begin=True)
     return z
 
 def main_table_print(data):
@@ -443,7 +451,7 @@ if __name__=="__main__":
             print()
             print('test',file)
             #ss=open(os.path.join("tests",file),encoding='utf-8').read().split('\n')
-            ss=open('W:\\AGEngineAplha0.1.4\\Sources\\lib\\AG.Graphic.pas').read().split('\n')[973:]
+            ss=open('W:\\AGEngineAplha0.1.4\\Sources\\lib\\AG.Graphic.pas').read().split('\n')[259:]
             for i in get_headers('',ss):
                 print(i)
             break
