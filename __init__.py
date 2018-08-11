@@ -102,34 +102,28 @@ def std_block_parse(var_at_begin=False,LowStop=False):
         return z
 
 def begin_block_parse():
-    global ended,line
+    global ended, line
     z = []
     i = 0
     s = 'begin'
     while not ended:
         if s.lower() in FUNCS:
-            ss=(ended, line,s)
-            s=get()
-            f='.' in s
+            ss = get()
+            restore(ss)
+            if not '.' in ss:
+                restore(NODE_ANON)
             restore(s)
-            ended, line = ss[0], ss[1]
-            if f:
-                restore(ss[2])
+            if '.' in ss:
                 break
             else:
-                restore(NODE_ANON)
-                restore(s[2])
                 z+=std_block_parse(LowStop=True)
         if s.lower() in ['begin','case','try','asm']:
             i+=1
         if s.lower() == 'end':
             i-=1
             if i == 0:
-                s = get()
+                #s = get()
                 break
-        if s.lower() in BLOCKS+ACCESS_CONTROL+FUNCTIONS_DIRECTIVES:
-            restore(s)
-            break
         s = get()
     return z
 
