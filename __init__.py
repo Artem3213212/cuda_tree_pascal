@@ -108,12 +108,16 @@ def begin_block_parse():
     s = 'begin'
     while not ended:
         if s.lower() in FUNCS:
-            ss = get()
-            restore(ss)
-            if not '.' in ss:
+            l = line
+            ss = (get(), get())
+            restore(ss[1])
+            ended = False
+            restore(ss[0])
+            if '.' != ss[1]:
                 restore(NODE_ANON)
+            line = l
             restore(s)
-            if '.' in ss:
+            if '.' == ss[1]:
                 break
             else:
                 z+=std_block_parse(LowStop=True)
