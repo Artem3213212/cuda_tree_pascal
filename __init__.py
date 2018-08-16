@@ -344,7 +344,7 @@ def type_block_parse():
                     if ended:
                         return
                     ss=get()
-                set_last(s)
+                restore(s)
                 update_bp=False
                 continue
     return z
