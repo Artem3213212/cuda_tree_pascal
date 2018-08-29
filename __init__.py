@@ -431,8 +431,9 @@ def get_headers(filename, lines):
     global uses, tokenizer, ended, line
     out, uses = [], []
     ended, line = False, 0
-    tokenizer = PasTokenizerStack(lines, False)
-    main_data=std_block_parse()
+    tokenizer = PasTokenizerParallelStack(lines, False)
+    main_data = std_block_parse()
+    tokenizer.stop()
     if uses:
         yield (uses[0][1],1,'uses',ICON_USES)
         i=0
