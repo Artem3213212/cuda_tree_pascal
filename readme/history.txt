@@ -1,3 +1,6 @@
 
 2018.08.09
 initial
+
+2018.08.29
+fixed few crashes
