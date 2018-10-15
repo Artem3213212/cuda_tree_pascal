@@ -283,7 +283,8 @@ def type_block_parse():
         if s==';':
             continue
         elif s.lower()=='generic':
-            s = get()
+            update_bp = False
+            continue
         elif s.lower() in ['procedure','function','begin','implementation','interface','initialization','finalization','property']+BLOCKS:
             tokenizer.push((s,(line[1],line[0]),(line[3],line[2]),ended))
             break
@@ -338,6 +339,9 @@ def type_block_parse():
                 while not ended:
                     if ss=='>':
                         i-=1
+                    if ss=='>=':
+                        restore('=')
+                        break
                     elif ss=='<':
                         i+=1
                     if i==0:
