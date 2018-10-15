@@ -28,7 +28,8 @@ def get():
     else:
         s = ('',(line[1],line[0]),(line[3],line[2]),ended)
     ended = s[3]
-    #print(s)
+    if s[0]=='object':
+        s = ('class',s[1],s[2],s[3])
     line = (s[1][1],s[1][0],s[2][1],s[2][0])
     return s[0]
 
