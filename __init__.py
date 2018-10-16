@@ -143,11 +143,15 @@ def function_parse(begin_pos,funcreg):
                 restore(s)
                 break
     def generic_clear(s):
-        a,b=s.find('<'),s.rfind('>')+1
-        if a!=-1:
-            return s[:a]+s[b:]
-        else:
-            return s
+        z,i='',0
+        for c in s:
+            if c=='<':
+                i+=1
+            elif c=='>':
+                i-=1
+            elif i==0:
+                z=z+c
+        return z
     s=''
     ss=''
     while not ended:
