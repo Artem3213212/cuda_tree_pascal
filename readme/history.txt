@@ -1,5 +1,6 @@
 
 2018.10.16
++ add: support nested classes in generics (e.g. gLinkedList.pp)
 + add: supports generics in ObjFpc style
 + add: support keyword "object"
 
