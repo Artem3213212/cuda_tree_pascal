@@ -2,20 +2,23 @@ TreeHelper for Pascal lexer.
 Requires plugin CudaTree to work.
 
 Based on Python library PyPascalTokenizer.
-
 Can parse and show these Pascal entities:
+
 - standalone functions/procedures
 - class methods
-- classes
-- nested classes (nesting level: 2 or more)
-- nested functions (nesting level: 2 or more)
+- classes (and objects)
+- class operators
+- nested classes (nesting level: 1 or more)
+- nested functions (nesting level: 1 or more)
 - interfaces
 - var/const declarations, global and local (in funcs/methods)
 - properties
 - uses (both interface/implementation, shown under single node)
 - resourcestrings
-- anonymous funcs/methods
+- anonymous functions, methods
 - type declarations (enums/arrays/records/etc)
+- generics (mode: Delphi, ObjFpc)
+- nested classes in generics
 
 It was tested on:
 - several FreePascal units (FPJson, RegExpr etc)
