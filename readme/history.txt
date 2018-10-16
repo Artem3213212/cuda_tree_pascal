@@ -1,7 +1,7 @@
 
 2018.10.16
-- fix: generics in ObjFpc style not supported
-- fix: keyword "object" not supportd
++ add: supports generics in ObjFpc style
++ add: support keyword "object"
 
 2018.08.29
 - fixed few crashes
