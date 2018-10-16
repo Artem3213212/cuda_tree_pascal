@@ -296,7 +296,7 @@ def type_block_parse():
         elif s.lower()=='generic':
             update_bp = False
             continue
-        elif s.lower() in ['procedure','function','begin','implementation','interface','initialization','finalization','property']+BLOCKS:
+        elif s.lower() in ['procedure','function','begin','implementation','interface','initialization','finalization','property']+BLOCKS+ACCESS_CONTROL:
             tokenizer.push((s,(line[1],line[0]),(line[3],line[2]),ended))
             break
         elif s.lower()=='class':
@@ -310,6 +310,15 @@ def type_block_parse():
                 continue
             elif ss=='=':
                 s=get()
+                if s.lower() in ['function','procedure','reference']:
+                    i=0
+                    while i!=0 or s!=';':
+                        s=get()
+                        if s=='(':
+                            i+=1
+                        elif s==')':
+                            i-=1
+                    z.append((begin_pos,objname,ICON_TYPE_IN,[]))
                 if s.lower()=='packed':
                     s=get()
                 if s.lower()=='specialize':
