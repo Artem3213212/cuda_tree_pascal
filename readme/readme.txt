@@ -19,6 +19,7 @@ Can parse and show these Pascal entities:
 - anonymous functions, methods
 - generics (mode: Delphi, ObjFpc)
 - nested classes in generics
+- keyword "reference" (from Delphi)
 
 It was tested on:
 - several FreePascal units (FPJson, RegExpr etc)
