@@ -5,18 +5,18 @@ Based on Python library PyPascalTokenizer.
 Can parse and show these Pascal entities:
 
 - standalone functions/procedures
+- type declarations: enums, arrays, records, sets etc
+- classes (and "object"s)
 - class methods
-- classes (and objects)
 - class operators
 - nested classes (nesting level: 1 or more)
 - nested functions (nesting level: 1 or more)
 - interfaces
 - var/const declarations, global and local (in funcs/methods)
 - properties
-- uses (both interface/implementation, shown under single node)
+- uses-sections (both interface/implementation, shown under single node)
 - resourcestrings
 - anonymous functions, methods
-- type declarations (enums/arrays/records/etc)
 - generics (mode: Delphi, ObjFpc)
 - nested classes in generics
 
