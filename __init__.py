@@ -142,6 +142,12 @@ def function_parse(begin_pos,funcreg):
             else:
                 restore(s)
                 break
+    def generic_clear(s):
+        a,b=s.find('<'),s.rfind('>')+1
+        if a!=-1:
+            return s[:a]+s[b:]
+        else:
+            return s
     s=''
     ss=''
     while not ended:
@@ -149,6 +155,7 @@ def function_parse(begin_pos,funcreg):
         if ss in ['(',':',';','begin']+FUNCS+BLOCKS:
             break
         s=s+ss
+    s=generic_clear(s)
     if ss == '(':
         while not ended and not get()==')':
             pass
