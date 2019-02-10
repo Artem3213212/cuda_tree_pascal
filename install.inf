@@ -1,6 +1,6 @@
 [info]
 title=TreeHelper for Pascal
-desc=TreeHelper for CudaTree, adds support for Pascal lexer
+desc=TreeHelper for Pascal lexer
 type=cudatext-plugin
 subdir=cuda_tree_pascal
 homepage=https://github.com/Artem3213212/cuda_tree_pascal
