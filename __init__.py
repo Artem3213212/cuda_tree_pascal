@@ -452,7 +452,7 @@ def table_print(level, name, data):
         yield (i[0],level,i[1],i[2])
         yield from table_print(level+1,name+'.'+i[1],i[3])
 
-def get_headers(filename, lines):
+def _get(filename, lines):
     global uses, tokenizer, ended, line
     out, uses = [], []
     ended, line = False, 0
@@ -475,6 +475,10 @@ def get_headers(filename, lines):
             i+=1
         yield (s[1],2,s[0],ICON_USES_IN)
     yield from main_table_print(main_data)
+
+def get_headers(filename, lines):
+    # CudaText 1.75+ requires list
+    return list(_get(filename, lines))
 
 if __name__=="__main__":
     import os

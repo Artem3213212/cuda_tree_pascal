@@ -1,4 +1,7 @@
 
+2019.02.10
+- adapt to CudaText 1.75
+
 2018.10.17
 - fix: nested classes in generics (e.g. gLinkedList from FPC)
 
