@@ -1,5 +1,4 @@
 TreeHelper for Pascal lexer.
-Requires plugin CudaTree to work.
 
 Based on Python library PyPascalTokenizer.
 Can parse and show these Pascal entities:
