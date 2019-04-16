@@ -155,7 +155,7 @@ class PasTokenizer():
             ss=ss[0]
         ss=(ss,begin_pos,self._get_pos(),self.ended)
         self._skip_spaces()
-        if len(ss[0])==0:
+        if len(ss[0])==0 and not ss[3]:
             raise Exception('Tokenizer error')
         return ss
 

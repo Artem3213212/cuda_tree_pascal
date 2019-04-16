@@ -25,7 +25,6 @@ def get():
     global ended, line
     if not ended:
         s = tokenizer.pop()
-        print(s)
     else:
         s = ('',(line[1],line[0]),(line[3],line[2]),ended)
     ended = s[3]
@@ -455,27 +454,30 @@ def table_print(level, name, data):
 
 def _get(filename, lines):
     global uses, tokenizer, ended, line
-    out, uses = [], []
-    ended, line = False, 0
-    tokenizer = PasTokenizerStack(lines, False)
-    main_data = std_block_parse()
-    #tokenizer.stop()
-    if uses:
-        yield (uses[0][1],1,'uses',ICON_USES)
-        i=0
-        while i!=len(uses):
-            if i==0:
-                s=uses[0]
-            else:
-                if uses[i][0]=='.' and i!=len(uses)-1:
-                    i+=1
-                    s=(s[0]+'.'+uses[i][0],s[1])
+    try:
+        out, uses = [], []
+        ended, line = False, 0
+        tokenizer = PasTokenizerStack(lines, False)
+        main_data = std_block_parse()
+        #tokenizer.stop()
+        if uses:
+            yield (uses[0][1],1,'uses',ICON_USES)
+            i=0
+            while i!=len(uses):
+                if i==0:
+                    s=uses[0]
                 else:
-                    yield (s[1],2,s[0],4)
-                    s=uses[i]
-            i+=1
-        yield (s[1],2,s[0],ICON_USES_IN)
-    yield from main_table_print(main_data)
+                    if uses[i][0]=='.' and i!=len(uses)-1:
+                        i+=1
+                        s=(s[0]+'.'+uses[i][0],s[1])
+                    else:
+                        yield (s[1],2,s[0],4)
+                        s=uses[i]
+                i+=1
+            yield (s[1],2,s[0],ICON_USES_IN)
+        yield from main_table_print(main_data)
+    except:
+    	pass
 
 def get_headers(filename, lines):
     # CudaText 1.75+ requires list
