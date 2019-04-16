@@ -25,6 +25,7 @@ def get():
     global ended, line
     if not ended:
         s = tokenizer.pop()
+        print(s)
     else:
         s = ('',(line[1],line[0]),(line[3],line[2]),ended)
     ended = s[3]
@@ -456,7 +457,7 @@ def _get(filename, lines):
     global uses, tokenizer, ended, line
     out, uses = [], []
     ended, line = False, 0
-    tokenizer = PasTokenizerParallelStack(lines, False)
+    tokenizer = PasTokenizerStack(lines, False)
     main_data = std_block_parse()
     tokenizer.stop()
     if uses:
@@ -487,7 +488,7 @@ if __name__=="__main__":
             print()
             print('test',file)
             #ss=open(os.path.join("tests",file),encoding='utf-8').read().split('\n')
-            ss=open('W:\\AGEngineAplha0.1.4\\Sources\\lib\\AG.Graphic.pas').read().split('\n')[259:]
+            ss=['}']
             for i in get_headers('',ss):
                 print(i)
             break
