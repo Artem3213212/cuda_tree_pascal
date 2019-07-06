@@ -485,12 +485,12 @@ def get_headers(filename, lines):
 
 if __name__=="__main__":
     import os
-    for file in ['jsonscanner.pp']:#os.listdir("tests"):
+    for file in ['E:\\atbinhex0.pas']:#os.listdir("tests"):
         if file.endswith(".pp") or file.endswith(".pas"):
             print()
             print('test',file)
-            #ss=open(os.path.join("tests",file),encoding='utf-8').read().split('\n')
-            ss=['}']
+            ss=open(file,encoding='utf-8').read().split('\n')
+            #ss=['}']
             for i in get_headers('',ss):
                 print(i)
             break

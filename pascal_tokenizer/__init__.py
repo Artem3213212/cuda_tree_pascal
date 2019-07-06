@@ -95,6 +95,8 @@ class PasTokenizer():
                         ss = line[self.x:]
                         self.x = l
                         break
+                    else:
+                        ss=['/']
                 elif now_sym == '{':
                     ml = '}'
                     ss=[now_sym]
